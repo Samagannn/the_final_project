@@ -10,8 +10,6 @@ def safe_list_get(l, idx, default=None):
         return default
 
 
-
-
 class NestedMultiPartParser(MultiPartParser):
 
     def parse(self, stream, media_type=None, parser_context=None):
