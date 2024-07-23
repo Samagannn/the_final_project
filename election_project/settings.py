@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-z!ka%tslb74a7wl^z!-r#wsz9e+-+wf0nv(r&h+5o9@_^2w9xf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['Samagan3.pythonanywhere.com']
 
 # Application definition
 
@@ -144,7 +144,7 @@ REST_FRAMEWORK = {
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static', 'static_dirs'),
+    os.path.join(BASE_DIR, 'static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static', 'static_root')
 
