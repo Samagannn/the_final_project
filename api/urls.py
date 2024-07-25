@@ -16,3 +16,4 @@ urlpatterns = [
     path('auth/', include('api.auth.urls')),
     path('', include(router.urls)),
 ]
+

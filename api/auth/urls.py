@@ -7,10 +7,6 @@ urlpatterns = [
     path('register/', views.RegisterAPIView.as_view(), name='register'),
     path('become_candidate/', become_candidate, name='become_candidate'),
     path('become_admin/', become_admin, name='become_admin'),
-    path('profile/', views.RedactorProfileApiView.as_view({
-        'get': 'get',
-        'post': 'post',
-        'put': 'put',
-        'patch': 'patch',
-    })),
+    path('profile/', views.UserProfileApiView.as_view(), name='profile')
 ]
+
