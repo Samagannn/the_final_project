@@ -34,20 +34,24 @@ class ReadUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'email', 'first_name', 'last_name')
+        fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'old_password', 'new_password')
 
     def validate(self, data):
         user = self.instance
         old_password = data.get('old_password')
         new_password = data.get('new_password')
 
-        if old_password and not user.check_password(old_password):
-            raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
+        if old_password:
+            if not user.check_password(old_password):
+                raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
+
+        if new_password:
+            validate_password(new_password)
 
         return data
 
     def update(self, instance, validated_data):
-        validated_data.pop('old_password', None)
+        old_password = validated_data.pop('old_password', None)
         new_password = validated_data.pop('new_password', None)
 
         for attr, value in validated_data.items():
@@ -58,3 +62,4 @@ class ReadUserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
