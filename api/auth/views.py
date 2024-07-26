@@ -9,6 +9,7 @@ from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserS
 
 User = get_user_model()
 
+
 class RegisterAPIView(CreateAPIView):
     serializer_class = CreatUserSerializer
 

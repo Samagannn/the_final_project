@@ -2,6 +2,7 @@ from account.models import User
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
+from rest_framework.authtoken.models import Token
 
 
 class LoginSerializer(serializers.Serializer):
@@ -10,9 +11,15 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ReadUserSerializer(serializers.ModelSerializer):
+    token = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         exclude = ('password', 'user_permissions', 'groups')
+
+    def get_token(self, obj):
+        token, created = Token.objects.get_or_create(user=obj)
+        return token.key
 
 
 class CreatUserSerializer(serializers.ModelSerializer):
