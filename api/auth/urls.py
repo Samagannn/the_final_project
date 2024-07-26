@@ -9,4 +9,3 @@ urlpatterns = [
     path('become_admin/', become_admin, name='become_admin'),
     path('profile/', views.UserProfileApiView.as_view(), name='profile')
 ]
-

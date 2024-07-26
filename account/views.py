@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from api.serializers import UserSerializer
-
+from rest_framework.authentication import TokenAuthentication
 
 @login_required
 def become_candidate(request):
@@ -36,9 +36,17 @@ def become_admin(request):
 
 
 class UserProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone': user.phone,
+            'role': user.role,
+        }
+        return Response(data)
