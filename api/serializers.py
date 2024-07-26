@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from election.models import Election, Candidate, Vote, Voter
-from django.contrib.auth.models import User
+from account.models import User
 
 
 class ElectionSerializer(serializers.ModelSerializer):
@@ -18,7 +18,8 @@ class CandidateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'avatar', 'role')
+        fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'avatar',
+                  'role')
 
 
 class VoteSerializer(serializers.ModelSerializer):

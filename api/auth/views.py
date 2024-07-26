@@ -12,6 +12,7 @@ User = get_user_model()
 
 class RegisterAPIView(CreateAPIView):
     serializer_class = CreatUserSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -25,6 +26,7 @@ class RegisterAPIView(CreateAPIView):
 
 class LoginAPIView(GenericAPIView):
     serializer_class = LoginSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -41,7 +43,8 @@ class LoginAPIView(GenericAPIView):
             return Response(data)
 
         return Response(
-            {'detail': 'Не существует пользователя или неверный пароль.'}, status=status.HTTP_401_UNAUTHORIZED)
+            {'detail': 'Не существует пользователя или неверный пароль.'}, status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class UserProfileApiView(GenericAPIView):

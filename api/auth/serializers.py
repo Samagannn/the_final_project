@@ -1,8 +1,26 @@
-from account.models import User
 from rest_framework import serializers
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.authtoken.models import Token
+
+User = get_user_model()
+
+
+class CreatUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+
+    class Meta:
+        model = User
+        fields = ('id', 'phone', 'password', 'email', 'first_name', 'last_name')
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            phone=validated_data['phone'],
+            password=validated_data['password'],
+            email=validated_data.get('email'),
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name')
+        )
+        return user
 
 
 class LoginSerializer(serializers.Serializer):
@@ -11,32 +29,6 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ReadUserSerializer(serializers.ModelSerializer):
-    token = serializers.SerializerMethodField()
-
     class Meta:
         model = User
-        exclude = ('password', 'user_permissions', 'groups')
-
-    def get_token(self, obj):
-        token, created = Token.objects.get_or_create(user=obj)
-        return token.key
-
-
-class CreatUserSerializer(serializers.ModelSerializer):
-    password1 = serializers.CharField(write_only=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        exclude = ('password', 'user_permissions', 'groups', 'is_staff', 'is_active', 'is_superuser')
-
-    def validate(self, data):
-        if data['password1'] != data['password2']:
-            raise serializers.ValidationError({'password2': ["Пароли не совпадают."]})
-        return data
-
-    def create(self, validated_data):
-        password = validated_data.pop('password1')
-        validated_data.pop('password2')
-        validated_data['password'] = make_password(password)
-        return super().create(validated_data)
+        fields = ('id', 'phone', 'email', 'first_name', 'last_name')
