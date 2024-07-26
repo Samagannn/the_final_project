@@ -11,14 +11,14 @@ class UserAdmin(BaseUserAdmin):
         'id',
         'email',
         'phone',
-        'get_full_name',
+        'first_name',
+        'last_name',
         'role',
-        'get_avatar',
     )
     list_display_links = ('id', 'email',)
     search_fields = ('first_name', 'last_name', 'email', 'phone')
-    filter_horizontal = ('groups', 'user_permissions')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    filter_horizontal = ()
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'role')
     ordering = ('-date_joined',)
     fieldsets = (
         (None, {'fields': (
@@ -28,7 +28,6 @@ class UserAdmin(BaseUserAdmin):
         )}),
         (_('Personal info'), {'fields': (
             'avatar',
-            'get_avatar',
             'first_name',
             'last_name',
         )}),
@@ -37,8 +36,6 @@ class UserAdmin(BaseUserAdmin):
             'is_active',
             'is_staff',
             'is_superuser',
-            'groups',
-            'user_permissions',
         )}),
         (_('Important dates'), {'fields': (
             'date_joined',
@@ -47,13 +44,9 @@ class UserAdmin(BaseUserAdmin):
     )
     readonly_fields = (
         'get_full_name',
-        'get_avatar',
         'date_joined',
         'last_login',
     )
-    # autocomplete_fields = (
-    #     'address',
-    # )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -72,5 +65,9 @@ class UserAdmin(BaseUserAdmin):
             return mark_safe(
                 f'<img src="{user.avatar.url}" alt="{user.get_full_name}" width="100px" />')
         return '-'
+
+    @admin.display(description=_('Полное имя'))
+    def get_full_name(self, user):
+        return user.get_full_name()
 
 # Register your models here.

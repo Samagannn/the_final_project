@@ -6,23 +6,24 @@ from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from rest_framework.request import Request
+from rest_framework.views import APIView
+
 from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserSerializer
+from api.serializers import UserSerializer
 
 User = get_user_model()
 
 
-class RegisterAPIView(CreateAPIView):
+class RegisterAPIView(APIView):
     serializer_class = CreatUserSerializer
     permission_classes = (permissions.AllowAny,)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
-        read_serializer = ReadUserSerializer(user, context={'request': request})
-        data = {**read_serializer.data, 'token': token.key}
-        return Response(data, status=status.HTTP_201_CREATED)
+    def post(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginAPIView(GenericAPIView):

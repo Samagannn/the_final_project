@@ -1,47 +1,64 @@
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django_resized import ResizedImageField
 from phonenumber_field.modelfields import PhoneNumberField
-from account.managers import UserManager
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractUser):
     CLIENT = 'client'
-    CANDIDATE = 'canditat'
+    CANDIDATE = 'candidate'
     ADMIN = 'admin'
 
-    ROLE = (
-        (CLIENT, 'Админ'),
+    ROLE_CHOICES = (
+        (CLIENT, 'Избиратель'),
         (CANDIDATE, 'Кандидат'),
-        (ADMIN, 'Избиратель')
+        (ADMIN, 'Администратор'),
     )
 
-    class Meta:
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
-        ordering = ('-date_joined',)
-
-    username = None
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=30, unique=True)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES)
+    date_of_birth = models.DateField(blank=True, null=True)
+    phone = PhoneNumberField(unique=True, blank=True, null=True)
     avatar = ResizedImageField(size=[500, 500], crop=['middle', 'center'],
-                               upload_to='avatars/', force_format='WEBP', quality=90, verbose_name='аватарка',
-                               null=True, blank=True)
-    phone = PhoneNumberField(max_length=100, unique=True, verbose_name='номер телефона')
-    email = models.EmailField(null=True, verbose_name='электронная почта', unique=True)
-    role = models.CharField('роль', choices=ROLE, max_length=15)
+                               upload_to='avatars/', force_format='WEBP', quality=90, null=True, blank=True)
+    employee_id = models.CharField(max_length=30, blank=True, null=True)
+    department = models.CharField(max_length=30, blank=True, null=True)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    def __str__(self):
+        return self.email
 
     @property
     def get_full_name(self):
-        return f'{self.last_name} {self.first_name}'
-
-    get_full_name.fget.short_description = 'полное имя'
-
-    def __str__(self):
-        return f'{self.get_full_name or str(self.phone)}'
+        return f'{self.first_name} {self.last_name}'
 
     def set_candidate(self):
         self.role = self.CANDIDATE
@@ -57,5 +74,3 @@ def check_three_and_two(arr):
         if not 2 <= arr.count(i) <= 3:
             return False
     return True
-
-

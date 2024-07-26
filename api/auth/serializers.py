@@ -7,16 +7,25 @@ User = get_user_model()
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
+    password_confirmation = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'password', 'email', 'first_name', 'last_name')
+        fields = ('id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name')
+
+    def validate(self, data):
+        if data['password'] != data['password_confirmation']:
+            raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
+        if not data.get('email'):
+            raise serializers.ValidationError({"email": "Email is required"})
+        return data
 
     def create(self, validated_data):
+        validated_data.pop('password_confirmation')
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
-            email=validated_data.get('email'),
+            email=validated_data['email'],
             first_name=validated_data.get('first_name'),
             last_name=validated_data.get('last_name')
         )
@@ -37,13 +46,12 @@ class ReadUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'old_password', 'new_password')
 
     def validate(self, data):
-        user = self.instance
         old_password = data.get('old_password')
         new_password = data.get('new_password')
+        user = self.instance
 
-        if old_password:
-            if not user.check_password(old_password):
-                raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
+        if old_password and not user.check_password(old_password):
+            raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
 
         if new_password:
             validate_password(new_password)
@@ -62,4 +70,3 @@ class ReadUserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-

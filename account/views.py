@@ -11,6 +11,7 @@ from rest_framework import status
 from api.serializers import UserSerializer
 from rest_framework.authentication import TokenAuthentication
 
+
 @login_required
 def become_candidate(request):
     user = request.user
