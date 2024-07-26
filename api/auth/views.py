@@ -1,4 +1,5 @@
 from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework import status, permissions
@@ -48,24 +49,34 @@ class LoginAPIView(GenericAPIView):
 
 
 class UserProfileApiView(GenericAPIView):
+    queryset = User.objects.all()
     serializer_class = ReadUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request: Request):
+    def get(self, request):
         user = request.user
         serializer = self.serializer_class(user)
         return Response(serializer.data)
 
-    def put(self, request: Request):
+    def put(self, request):
         user = request.user
         serializer = self.serializer_class(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    def patch(self, request: Request):
+    def patch(self, request):
         user = request.user
         serializer = self.serializer_class(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+    def _update(self, request, partial=False):
+        instance = request.user
+        serializer = self.get_serializer(instance=instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        data = {**serializer.data, 'token': token.key}
         return Response(serializer.data)

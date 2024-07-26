@@ -29,6 +29,32 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ReadUserSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(write_only=True, required=False)
+    new_password = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
         fields = ('id', 'phone', 'email', 'first_name', 'last_name')
+
+    def validate(self, data):
+        user = self.instance
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+
+        if old_password and not user.check_password(old_password):
+            raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
+
+        return data
+
+    def update(self, instance, validated_data):
+        validated_data.pop('old_password', None)
+        new_password = validated_data.pop('new_password', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if new_password:
+            instance.set_password(new_password)
+
+        instance.save()
+        return instance
