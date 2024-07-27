@@ -15,7 +15,7 @@ class Election(models.Model):
 
 class Candidate(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    election = models.ForeignKey(Election, on_delete=models.CASCADE)
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True)
     bio = models.TextField()
     party = models.CharField(max_length=255)
     photo = models.ImageField(upload_to='candidate_photos/', blank=True, null=True)

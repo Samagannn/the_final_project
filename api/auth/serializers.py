@@ -1,26 +1,28 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from election.models import Candidate
+from election.models import Candidate, Election
 
 User = get_user_model()
 
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ['election', 'party', 'photo']
+        fields = ['election', 'party', 'photo', 'bio']
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
     party = serializers.CharField(write_only=True, required=False)
     photo = serializers.ImageField(write_only=True, required=False)
+    bio = serializers.CharField(write_only=True, required=False)
+    election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = (
             'id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name', 'role', 'party',
-            'photo'
+            'photo', 'bio', 'election'
         )
 
     def validate(self, data):
@@ -34,6 +36,8 @@ class CreatUserSerializer(serializers.ModelSerializer):
         if role == User.CANDIDATE:
             if not data.get('party'):
                 raise serializers.ValidationError({"party": "This field may not be blank."})
+            if not data.get('bio'):
+                raise serializers.ValidationError({"bio": "This field may not be blank."})
         elif role == User.CLIENT:
             # Не требуется проверка полей для избирателя
             pass
@@ -42,6 +46,12 @@ class CreatUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirmation')
+
+        phone = validated_data['phone']
+
+        # Проверка уникальности номера телефона
+        if User.objects.filter(phone=phone).exists():
+            raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
         # Создание пользователя
         user = User.objects.create_user(
@@ -57,17 +67,24 @@ class CreatUserSerializer(serializers.ModelSerializer):
         if user.role == User.CANDIDATE:
             party = validated_data.get('party')
             photo = validated_data.get('photo')
+            bio = validated_data.get('bio')
+            election = validated_data.get('election')
             Candidate.objects.create(
                 user=user,
                 party=party,
-                photo=photo
+                photo=photo,
+                bio=bio,
+                election=election
             )
 
         return user
 
+
+
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
 
 class ReadUserSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(write_only=True, required=False)
