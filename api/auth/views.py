@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserSerializer
-from api.serializers import CandidateSerializer, VoteSerializer, VoterSerializer
+from api.serializers import CandidateSerializer, VoterSerializer
 from election.models import Candidate, Vote, Voter
 from drf_yasg import openapi
 User = get_user_model()

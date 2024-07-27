@@ -3,38 +3,28 @@ from account.models import User
 import json
 from django.utils import timezone
 from django_resized import ResizedImageField
+from django.conf import settings
 
 
 class Election(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     description = models.TextField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-
-    def __str__(self):
-        return self.name
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
 
 
 class Candidate(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True)
-    party = models.CharField(max_length=255)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    election = models.ForeignKey(Election, on_delete=models.CASCADE)
     bio = models.TextField()
-
-    photo = ResizedImageField(size=[500, 500], crop=['middle', 'center'],
-                              upload_to='candidate_photos/', force_format='WEBP', quality=90, null=True, blank=True)
-    votes_per_month = models.TextField(default='{}')
-
-    def __str__(self):
-        return self.user.email
+    party = models.CharField(max_length=255)
+    photo = models.ImageField(upload_to='candidate_photos/', blank=True, null=True)
 
 
 class Voter(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.user.username
+    has_voted = models.BooleanField(default=False)
 
 
 class Vote(models.Model):

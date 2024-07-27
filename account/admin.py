@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from .models import User
 
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
