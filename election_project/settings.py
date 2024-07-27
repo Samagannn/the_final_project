@@ -166,3 +166,14 @@ CORS_ALLOWED_ORIGINS = [
     "https://yourfrontend.com",
 ]
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'VALIDATOR_URL': None,
+    'APIS': [
+        {
+            'url': '/api/v1/',
+            'title': 'API Documentation',
+            'description': 'API documentation for our project.',
+        },
+    ],
+}
