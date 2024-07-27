@@ -12,6 +12,7 @@ from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserS
 from api.serializers import CandidateSerializer, VoterSerializer
 from election.models import Candidate, Vote, Voter
 from drf_yasg import openapi
+
 User = get_user_model()
 
 

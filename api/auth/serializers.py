@@ -9,7 +9,7 @@ User = get_user_model()
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ['election', 'party', 'bio']
+        fields = ['election', 'party', 'photo', 'bio']
 
 
 class CreatUserSerializer(serializers.ModelSerializer):
@@ -23,8 +23,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name', 'role', 'party',
-            'bio',
-            'photo')
+            'bio', 'photo')
 
     def validate(self, data):
         if data['password'] != data['password_confirmation']:
@@ -32,15 +31,11 @@ class CreatUserSerializer(serializers.ModelSerializer):
         if not data.get('email'):
             raise serializers.ValidationError({"email": "Email is required"})
 
-        # Проверка обязательных полей в зависимости от роли
         role = data.get('role')
         if role == User.CANDIDATE:
             if not data.get('party'):
                 raise serializers.ValidationError({"party": "This field may not be blank."})
-            if not data.get('bio'):
-                raise serializers.ValidationError({"bio": "This field may not be blank."})
         elif role == User.CLIENT:
-            # Не требуется проверка полей для избирателя
             pass
 
         return data
@@ -48,7 +43,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirmation')
 
-        # Создание пользователя
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
@@ -58,7 +52,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
             role=validated_data['role']
         )
 
-        # Если роль — кандидат, создайте профиль кандидата
         if user.role == User.CANDIDATE:
             party = validated_data.get('party')
             bio = validated_data.get('bio')
