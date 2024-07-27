@@ -32,7 +32,6 @@ class RegisterAPIView(APIView):
                 'last_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'role': openapi.Schema(type=openapi.TYPE_STRING, enum=[User.CLIENT, User.CANDIDATE, User.ADMIN]),
                 'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)"),
-                'bio': openapi.Schema(type=openapi.TYPE_STRING, description="Candidate biography"),
                 'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY,
                                         description="Candidate photo"),
             }
