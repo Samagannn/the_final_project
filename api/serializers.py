@@ -1,3 +1,4 @@
+# serializers.py
 from rest_framework import serializers
 from election.models import Election, Candidate, Vote, Voter
 from account.models import User
@@ -12,7 +13,7 @@ class ElectionSerializer(serializers.ModelSerializer):
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = '__all__'
+        fields = ['election', 'party', 'bio']
 
 
 class UserSerializer(serializers.ModelSerializer):

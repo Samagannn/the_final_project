@@ -24,3 +24,4 @@ class VoteViewSet(viewsets.ModelViewSet):
 class VoterViewSet(viewsets.ModelViewSet):
     queryset = Voter.objects.all()
     serializer_class = VoterSerializer
+

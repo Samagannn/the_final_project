@@ -6,8 +6,8 @@ admin.site.register(Election)
 
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
-    list_display = ('name', 'party', 'bio')
-    search_fields = ('name', 'party')
+    list_display = ('party', 'bio')
+    search_fields = ('party',)
 
 
 admin.site.register(Voter)

@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from .models import User
 
-
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
@@ -14,6 +13,7 @@ class UserAdmin(BaseUserAdmin):
         'first_name',
         'last_name',
         'role',
+        'get_avatar',  # Добавлено для отображения фото
     )
     list_display_links = ('id', 'email',)
     search_fields = ('first_name', 'last_name', 'email', 'phone')
@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
             'password',
         )}),
         (_('Personal info'), {'fields': (
-            'avatar',
+            'avatar',  # Добавлено для возможности редактирования фото
             'first_name',
             'last_name',
         )}),
@@ -46,6 +46,7 @@ class UserAdmin(BaseUserAdmin):
         'get_full_name',
         'date_joined',
         'last_login',
+        'get_avatar',  # Добавлено для отображения фото в режиме только для чтения
     )
     add_fieldsets = (
         (None, {
@@ -62,8 +63,7 @@ class UserAdmin(BaseUserAdmin):
     @admin.display(description=_('Аватарка'))
     def get_avatar(self, user):
         if user.avatar:
-            return mark_safe(
-                f'<img src="{user.avatar.url}" alt="{user.get_full_name}" width="100px" />')
+            return mark_safe(f'<img src="{user.avatar.url}" alt="{user.get_full_name}" width="100px" />')
         return '-'
 
     @admin.display(description=_('Полное имя'))

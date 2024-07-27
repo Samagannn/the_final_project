@@ -1,34 +1,75 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from election.models import Candidate
 
 User = get_user_model()
+
+
+class CandidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Candidate
+        fields = ['election', 'party', 'bio']
 
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
+    party = serializers.CharField(write_only=True, required=False)
+    bio = serializers.CharField(write_only=True, required=False)
+    photo = serializers.ImageField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name')
+        fields = (
+            'id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name', 'role', 'party',
+            'bio',
+            'photo')
 
     def validate(self, data):
         if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
         if not data.get('email'):
             raise serializers.ValidationError({"email": "Email is required"})
+
+        # Проверка обязательных полей в зависимости от роли
+        role = data.get('role')
+        if role == User.CANDIDATE:
+            if not data.get('party'):
+                raise serializers.ValidationError({"party": "This field may not be blank."})
+            if not data.get('bio'):
+                raise serializers.ValidationError({"bio": "This field may not be blank."})
+        elif role == User.CLIENT:
+            # Не требуется проверка полей для избирателя
+            pass
+
         return data
 
     def create(self, validated_data):
         validated_data.pop('password_confirmation')
+
+        # Создание пользователя
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
             email=validated_data['email'],
             first_name=validated_data.get('first_name'),
-            last_name=validated_data.get('last_name')
+            last_name=validated_data.get('last_name'),
+            role=validated_data['role']
         )
+
+        # Если роль — кандидат, создайте профиль кандидата
+        if user.role == User.CANDIDATE:
+            party = validated_data.get('party')
+            bio = validated_data.get('bio')
+            photo = validated_data.get('photo')
+            Candidate.objects.create(
+                user=user,
+                party=party,
+                bio=bio,
+                photo=photo
+            )
+
         return user
 
 
