@@ -36,15 +36,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'rest_framework.authtoken',
     'election',
     'account',
-    'phonenumber_field',
+    'rest_framework',
     'django_resized',
+    'corsheaders',
     'django_filters',
     'drf_yasg',
-    'corsheaders',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -162,7 +162,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://yourfrontend.com",
+    'http://localhost:8000',
+    'https://example.com',
 ]
 
