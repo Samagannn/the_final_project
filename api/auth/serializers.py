@@ -6,19 +6,23 @@ from election.models import Candidate, Election
 User = get_user_model()
 
 
+class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()  # Добавим поле для полного имени
+
+    class Meta:
+        model = User
+        fields = ['id', 'phone', 'email', 'full_name']  # Включаем поле полного имени
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+
 class CandidateSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
+    user = UserSerializer()  # Используем обновленный UserSerializer
 
     class Meta:
         model = Candidate
-        fields = ['id', 'election', 'party', 'photo', 'bio', 'name']
-        extra_kwargs = {
-            'party': {'required': False, 'allow_blank': True},
-            'user': {'required': False, 'allow_null': True},
-        }
-
-    def get_name(self, obj):
-        return obj.user.get_full_name() if obj.user else ''
+        fields = ['id', 'bio', 'party', 'photo', 'votes_per_month', 'user', 'election']
 
 
 class CreatUserSerializer(serializers.ModelSerializer):
@@ -37,6 +41,8 @@ class CreatUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        print("Incoming data:", data)  # Добавьте это для отладки
+
         if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
         if not data.get('email'):
@@ -44,10 +50,11 @@ class CreatUserSerializer(serializers.ModelSerializer):
 
         role = data.get('role')
         if role == User.CANDIDATE:
+            # Проверка поля party и bio
             if not data.get('party'):
-                raise serializers.ValidationError({"party": "This field may not be blank."})
+                print("Party field is blank or not provided")
             if not data.get('bio'):
-                raise serializers.ValidationError({"bio": "This field may not be blank."})
+                print("Bio field is blank or not provided")
 
         return data
 
@@ -100,7 +107,7 @@ class ReadUserSerializer(serializers.ModelSerializer):
         user = self.instance
 
         if old_password and not user.check_password(old_password):
-            raise serializers.ValidationError({'old_password': 'Incorrect current password'})
+            raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
 
         if new_password:
             validate_password(new_password)
