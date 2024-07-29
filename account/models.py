@@ -3,6 +3,7 @@ from django.db import models
 from django_resized import ResizedImageField
 from phonenumber_field.modelfields import PhoneNumberField
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -28,6 +29,7 @@ class UserManager(BaseUserManager):
             username = f"{base_username}_{counter}"
             counter += 1
         return username
+
 
 class User(AbstractUser):
     CLIENT = 'client'

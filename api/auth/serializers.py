@@ -5,10 +5,12 @@ from election.models import Candidate, Election
 
 User = get_user_model()
 
+
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
         fields = ['election', 'party', 'photo', 'bio']
+
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
@@ -21,7 +23,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'phone', 'password', 'password_confirmation', 'email', 'first_name', 'last_name', 'role', 'party',
+            'id', 'phone', 'password', 'password_confirmation', 'email', 'role', 'party',
             'photo', 'bio', 'election'
         )
 
@@ -41,6 +43,8 @@ class CreatUserSerializer(serializers.ModelSerializer):
         elif role == User.CLIENT:
             # Не требуется проверка полей для избирателя
             pass
+        elif role == User.ADMIN:
+            pass
 
         return data
 
@@ -58,8 +62,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
             phone=validated_data['phone'],
             password=validated_data['password'],
             email=validated_data['email'],
-            first_name=validated_data.get('first_name'),
-            last_name=validated_data.get('last_name'),
             role=validated_data['role']
         )
 
@@ -80,7 +82,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -92,7 +93,7 @@ class ReadUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'old_password', 'new_password')
+        fields = ('id', 'phone', 'email', 'old_password', 'new_password')
 
     def validate(self, data):
         old_password = data.get('old_password')

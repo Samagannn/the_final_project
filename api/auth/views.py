@@ -43,7 +43,7 @@ class RegisterAPIView(APIView):
             user = serializer.save()
             if user.role == User.CANDIDATE:
                 return Response(
-                    {"message": "Пользователь зарегистрирован как кандидат. Пожалуйста, заполните профиль кандидата."},
+                    {"message": "Пользователь зарегистрирован как кандидат."},
                     status=status.HTTP_201_CREATED)
             return Response({"message": "Пользователь зарегистрирован успешно."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
