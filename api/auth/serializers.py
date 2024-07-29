@@ -1,23 +1,32 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from election.models import Candidate, Election
 
 User = get_user_model()
 
 
 class CandidateSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = Candidate
-        fields = ['election', 'party', 'photo', 'bio']
+        fields = ['id', 'election', 'party', 'photo', 'bio', 'name']
+        extra_kwargs = {
+            'party': {'required': False, 'allow_blank': True},
+            'user': {'required': False, 'allow_null': True},
+        }
+
+    def get_name(self, obj):
+        return obj.user.get_full_name() if obj.user else ''
 
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
-    party = serializers.CharField(write_only=True, required=False)
-    photo = serializers.ImageField(write_only=True, required=False)
-    bio = serializers.CharField(write_only=True, required=False)
+    party = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    photo = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    bio = serializers.CharField(write_only=True, required=False, allow_blank=True)
     election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
 
     class Meta:
@@ -28,7 +37,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if 'password' in data and data['password'] != data.get('password_confirmation'):
+        if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
         if not data.get('email'):
             raise serializers.ValidationError({"email": "Email is required"})
@@ -43,29 +52,30 @@ class CreatUserSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirmation', None)
-
-        phone = validated_data.get('phone')
-        if not phone:
-            raise serializers.ValidationError({"phone": "This field is required."})
+        validated_data.pop('password_confirmation')
+        phone = validated_data['phone']
 
         if User.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
         user = User.objects.create_user(
-            phone=phone,
-            password=validated_data.get('password'),
-            email=validated_data.get('email'),
-            role=validated_data.get('role')
+            phone=validated_data['phone'],
+            password=validated_data['password'],
+            email=validated_data['email'],
+            role=validated_data['role']
         )
 
         if user.role == User.CANDIDATE:
+            party = validated_data.get('party')
+            photo = validated_data.get('photo')
+            bio = validated_data.get('bio')
+            election = validated_data.get('election')
             Candidate.objects.create(
                 user=user,
-                party=validated_data.get('party'),
-                photo=validated_data.get('photo'),
-                bio=validated_data.get('bio'),
-                election=validated_data.get('election')
+                party=party,
+                photo=photo,
+                bio=bio,
+                election=election
             )
 
         return user
@@ -90,7 +100,7 @@ class ReadUserSerializer(serializers.ModelSerializer):
         user = self.instance
 
         if old_password and not user.check_password(old_password):
-            raise serializers.ValidationError({'old_password': 'Неправильный текущий пароль'})
+            raise serializers.ValidationError({'old_password': 'Incorrect current password'})
 
         if new_password:
             validate_password(new_password)

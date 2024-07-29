@@ -21,20 +21,18 @@ class RegisterAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     @swagger_auto_schema(
+        operation_description="Register a new user",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'phone': openapi.Schema(type=openapi.TYPE_STRING),
-                'password': openapi.Schema(type=openapi.TYPE_STRING),
-                'password_confirmation': openapi.Schema(type=openapi.TYPE_STRING),
-                'email': openapi.Schema(type=openapi.TYPE_STRING),
-                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                'role': openapi.Schema(type=openapi.TYPE_STRING, enum=[User.CLIENT, User.CANDIDATE, User.ADMIN]),
-                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)"),
-                'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY,
-                                        description="Candidate photo"),
-            }
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description="First name"),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description="Last name"),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description="Email address"),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description="Password"),
+                'role': openapi.Schema(type=openapi.TYPE_STRING, description="User role"),
+                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)")
+            },
+            required=['first_name', 'last_name', 'email', 'password', 'role']  # This must be a list of strings
         )
     )
     def post(self, request, *args, **kwargs):
@@ -42,14 +40,10 @@ class RegisterAPIView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
-            response_data = {
-                "message": "Пользователь зарегистрирован успешно.",
-                "token": token.key
-            }
-            if user.role == User.CANDIDATE:
-                response_data["message"] = "Пользователь зарегистрирован как кандидат."
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            data = serializer.data
+            data['token'] = token.key
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response({"message": "User registered successfully"})
 
 
 class LoginAPIView(GenericAPIView):
