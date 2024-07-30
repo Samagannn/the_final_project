@@ -1,5 +1,5 @@
 from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework import status, permissions
@@ -18,7 +18,7 @@ User = get_user_model()
 
 class RegisterAPIView(APIView):
     serializer_class = CreatUserSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -31,8 +31,10 @@ class RegisterAPIView(APIView):
                 'first_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'last_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'role': openapi.Schema(type=openapi.TYPE_STRING, enum=[User.CLIENT, User.CANDIDATE, User.ADMIN]),
-                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)", blank=True, null=True),
-                'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY, description="Candidate photo"),
+                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)", blank=True,
+                                        null=True),
+                'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY,
+                                        description="Candidate photo"),
             }
         )
     )
@@ -40,10 +42,16 @@ class RegisterAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            read_serializer = UserSerializer(user, context={'request': request})
+            data = {**read_serializer.data, 'token': token.key}
             if user.role == User.CANDIDATE:
-                return Response({"message": "Пользователь зарегистрирован как кандидат."}, status=status.HTTP_201_CREATED)
-            return Response({"message": "Пользователь зарегистрирован успешно."}, status=status.HTTP_201_CREATED)
+                return Response({"message": "Пользователь зарегистрирован как кандидат."},
+                                status=status.HTTP_201_CREATED)
+            return Response({"message": "Пользователь зарегистрирован успешно.", **data},
+                            status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginAPIView(GenericAPIView):
     serializer_class = LoginSerializer
@@ -63,7 +71,9 @@ class LoginAPIView(GenericAPIView):
             data = {**read_serializer.data, 'token': token.key}
             return Response(data)
 
-        return Response({'detail': 'Не существует пользователя или неверный пароль.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'detail': 'Не существует пользователя или неверный пароль.'},
+                        status=status.HTTP_401_UNAUTHORIZED)
+
 
 class UserProfileApiView(GenericAPIView):
     queryset = User.objects.all()
