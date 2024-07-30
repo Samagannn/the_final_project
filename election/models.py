@@ -20,8 +20,6 @@ class Candidate(models.Model):
     party = models.CharField(max_length=255, null=True, blank=True)
     photo = models.ImageField(upload_to='candidate_photos/', blank=True, null=True)
     votes_per_month = models.TextField(blank=True, default='{}')
-    last_name = models.CharField(max_length=255, null=True, blank=True)
-    first_name = models.CharField(max_length=255, null=True, blank=True)
 
 
 class Voter(models.Model):

@@ -18,12 +18,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CandidateSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Candidate
         fields = ['id', 'bio', 'party', 'photo', 'votes_per_month', 'user', 'election']
 
+    def get_user(self, obj):
+        user = obj.user
+        return {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'phone': user.phone,
+            'email': user.email
+        }
 
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
