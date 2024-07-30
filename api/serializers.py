@@ -23,13 +23,10 @@ class VoterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'avatar',
-                  'employee_id', 'department', 'full_name', 'bio', 'party', 'photo']
-
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'bio', 'party', 'photo']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -44,8 +41,6 @@ class UserSerializer(serializers.ModelSerializer):
             date_of_birth=validated_data['date_of_birth'],
             phone=validated_data['phone'],
             password=validated_data['password'],
-            employee_id=validated_data.get('employee_id', None),
-            department=validated_data.get('department', None),
             bio=validated_data.get('bio', None),
             party=validated_data.get('party', None),
             photo=validated_data.get('photo', None),
