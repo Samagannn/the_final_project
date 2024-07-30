@@ -53,6 +53,9 @@ class User(AbstractUser):
                                upload_to='avatars/', force_format='WEBP', quality=90, null=True, blank=True)
     employee_id = models.CharField(max_length=30, blank=True, null=True)
     department = models.CharField(max_length=30, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)  # Добавьте это поле
+    party = models.CharField(max_length=255, blank=True, null=True)  # Добавьте это поле
+    photo = models.ImageField(upload_to='photos/', blank=True, null=True)  # Добавьте это поле
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

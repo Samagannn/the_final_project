@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserSerializer
-from api.serializers import CandidateSerializer, VoterSerializer
+from api.serializers import CandidateSerializer, VoterSerializer, UserSerializer
 from election.models import Candidate, Vote, Voter
 from drf_yasg import openapi
 
@@ -31,10 +31,8 @@ class RegisterAPIView(APIView):
                 'first_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'last_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'role': openapi.Schema(type=openapi.TYPE_STRING, enum=[User.CLIENT, User.CANDIDATE, User.ADMIN]),
-                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)", blank=True,
-                                        null=True),
-                'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY,
-                                        description="Candidate photo"),
+                'party': openapi.Schema(type=openapi.TYPE_STRING, description="Party name (for candidates)", blank=True, null=True),
+                'photo': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY, description="Candidate photo"),
             }
         )
     )
@@ -43,12 +41,9 @@ class RegisterAPIView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             if user.role == User.CANDIDATE:
-                return Response(
-                    {"message": "Пользователь зарегистрирован как кандидат."},
-                    status=status.HTTP_201_CREATED)
+                return Response({"message": "Пользователь зарегистрирован как кандидат."}, status=status.HTTP_201_CREATED)
             return Response({"message": "Пользователь зарегистрирован успешно."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginAPIView(GenericAPIView):
     serializer_class = LoginSerializer
@@ -64,18 +59,15 @@ class LoginAPIView(GenericAPIView):
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            read_serializer = ReadUserSerializer(user, context={'request': request})
+            read_serializer = UserSerializer(user, context={'request': request})
             data = {**read_serializer.data, 'token': token.key}
             return Response(data)
 
-        return Response(
-            {'detail': 'Не существует пользователя или неверный пароль.'}, status=status.HTTP_401_UNAUTHORIZED
-        )
-
+        return Response({'detail': 'Не существует пользователя или неверный пароль.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class UserProfileApiView(GenericAPIView):
     queryset = User.objects.all()
-    serializer_class = ReadUserSerializer
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

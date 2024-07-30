@@ -11,10 +11,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'phone', 'email', 'full_name', 'last_name', 'first_name']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'avatar', 'employee_id',
+                  'department', 'full_name', 'bio', 'party', 'photo']
 
     def get_full_name(self, obj):
         return obj.get_full_name()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if instance.role != User.CANDIDATE:
+            representation.pop('photo', None)
+            representation.pop('bio', None)
+            representation.pop('party', None)
+
+
+        return representation
 
 
 class CandidateSerializer(serializers.ModelSerializer):
@@ -34,6 +46,7 @@ class CandidateSerializer(serializers.ModelSerializer):
             'email': user.email
         }
 
+
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
@@ -43,6 +56,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
     election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
     last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     first_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
     class Meta:
         model = User
         fields = (
@@ -72,11 +86,9 @@ class CreatUserSerializer(serializers.ModelSerializer):
 
         phone = validated_data['phone']
 
-        # Проверка уникальности номера телефона
         if User.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
-        # Создание пользователя
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
@@ -86,7 +98,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name'),
         )
 
-        # Если роль — кандидат, создайте профиль кандидата
         if user.role == User.CANDIDATE:
             party = validated_data.get('party')
             photo = validated_data.get('photo')
@@ -112,10 +123,12 @@ class LoginSerializer(serializers.Serializer):
 class ReadUserSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(write_only=True, required=False)
     new_password = serializers.CharField(write_only=True, required=False)
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'email', 'old_password', 'new_password')
+        fields = ('id', 'phone', 'email', 'first_name', 'last_name', 'old_password', 'new_password')
 
     def validate(self, data):
         old_password = data.get('old_password')
