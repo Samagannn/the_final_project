@@ -7,18 +7,18 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()  # Добавим поле для полного имени
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'phone', 'email', 'full_name']  # Включаем поле полного имени
+        fields = ['id', 'phone', 'email', 'full_name', 'last_name', 'first_name']
 
     def get_full_name(self, obj):
         return obj.get_full_name()
 
 
 class CandidateSerializer(serializers.ModelSerializer):
-    user = UserSerializer()  # Используем обновленный UserSerializer
+    user = UserSerializer()
 
     class Meta:
         model = Candidate
@@ -28,7 +28,7 @@ class CandidateSerializer(serializers.ModelSerializer):
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
-    party = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    party = serializers.CharField(write_only=True, required=False, allow_blank=True)  # Необязательное поле
     photo = serializers.ImageField(write_only=True, required=False, allow_null=True)
     bio = serializers.CharField(write_only=True, required=False, allow_blank=True)
     election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
@@ -37,12 +37,11 @@ class CreatUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'phone', 'password', 'password_confirmation', 'email', 'role', 'party',
-            'photo', 'bio', 'election'
+            'photo', 'bio', 'election', 'last_name', 'first_name'
         )
 
     def validate(self, data):
-        print("Incoming data:", data)  # Добавьте это для отладки
-
+        # Ваши проверки валидности
         if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
         if not data.get('email'):
@@ -60,23 +59,30 @@ class CreatUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirmation')
+
         phone = validated_data['phone']
 
+        # Проверка уникальности номера телефона
         if User.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
+        # Создание пользователя
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
             email=validated_data['email'],
-            role=validated_data['role']
+            role=validated_data['role'],
+            last_name=validated_data.get('last_name', ''),
+            first_name=validated_data.get('first_name', '')
         )
 
+        # Если роль — кандидат, создайте профиль кандидата
         if user.role == User.CANDIDATE:
             party = validated_data.get('party')
             photo = validated_data.get('photo')
             bio = validated_data.get('bio')
             election = validated_data.get('election')
+
             Candidate.objects.create(
                 user=user,
                 party=party,

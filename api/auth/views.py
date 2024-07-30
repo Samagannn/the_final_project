@@ -100,19 +100,12 @@ class UserProfileApiView(GenericAPIView):
 
 class CandidateListView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = CandidateSerializer
 
     def get(self, request):
-        # Проверка роли пользователя
-        if request.user.role == User.CLIENT:
-            # Получение всех кандидатов
+        if request.user.role == User.CLIENT:  # Только избиратели могут просматривать кандидатов
             candidates = Candidate.objects.all()
-            # Сериализация данных
-            serializer = self.serializer_class(candidates, many=True)
-            # Возвращение ответа
+            serializer = CandidateSerializer(candidates, many=True)
             return Response(serializer.data)
-
-        # Возвращение ошибки, если роль пользователя не CLIENT
         return Response({"detail": "Доступ разрешен только избирателям."}, status=status.HTTP_403_FORBIDDEN)
 
 
