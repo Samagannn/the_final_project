@@ -1,3 +1,5 @@
+from httpie import status
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 from election.models import Election, Candidate, Vote, Voter
@@ -46,3 +48,11 @@ class VoteViewSet(viewsets.ModelViewSet):
 class VoterViewSet(viewsets.ModelViewSet):
     queryset = Voter.objects.all()
     serializer_class = VoterSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Обработка создания нового Voter
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

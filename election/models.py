@@ -29,8 +29,9 @@ class Voter(models.Model):
     has_voted = models.BooleanField(default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Предполагается связь один к одному
 
+
     def __str__(self):
-        return self.user.phone
+        return str(self.user.phone) 
 
 
 class Vote(models.Model):
