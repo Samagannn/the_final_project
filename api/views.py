@@ -46,12 +46,3 @@ class VoteViewSet(viewsets.ModelViewSet):
 class VoterViewSet(viewsets.ModelViewSet):
     queryset = Voter.objects.all()
     serializer_class = VoterSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]
-        return super().get_permissions()
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)

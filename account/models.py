@@ -80,3 +80,4 @@ class User(AbstractUser):
     def set_admin(self):
         self.role = self.ADMIN
         self.save()
+

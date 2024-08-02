@@ -25,9 +25,12 @@ class Candidate(models.Model):
 
 
 class Voter(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     address = models.CharField(max_length=255)
     has_voted = models.BooleanField(default=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Предполагается связь один к одному
+
+    def __str__(self):
+        return self.user.phone
 
 
 class Vote(models.Model):

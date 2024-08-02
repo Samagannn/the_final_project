@@ -25,7 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
             representation.pop('bio', None)
             representation.pop('party', None)
 
-
         return representation
 
 

@@ -1,29 +1,31 @@
-# serializers.py
 from rest_framework import serializers
 from election.models import Election, Candidate, Vote, Voter
 from account.models import User
-
 
 class ElectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Election
         fields = '__all__'
 
-
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
         fields = '__all__'
 
+class VoteSerializer(serializers.ModelSerializer):
+    candidate = CandidateSerializer()  # To include candidate details
+    voter = serializers.PrimaryKeyRelatedField(queryset=Voter.objects.all())  # Only include voter ID
 
-class VoterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Voter
-        fields = '__all__'
+        model = Vote
+        fields = ['id', 'candidate', 'voter', 'timestamp']
 
+class SortedVotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = ['id', 'candidate', 'timestamp']
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'bio', 'party', 'photo']
@@ -44,15 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
             bio=validated_data.get('bio', None),
             party=validated_data.get('party', None),
             photo=validated_data.get('photo', None),
-
         )
         return user
 
 
 class VoterSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  # Включаем только ID пользователя
+
     class Meta:
         model = Voter
-        fields = '__all__'
-        depth = 1
-        read_only_fields = ['election']
-        write_only_fields = ['election']
+        fields = ['id', 'address', 'has_voted', 'user']

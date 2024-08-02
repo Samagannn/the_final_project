@@ -10,7 +10,7 @@ class PhoneBackend(BaseBackend):
             if user.check_password(password):
                 return user
         except User.DoesNotExist:
-            return None
+            return Nonew
 
     def get_user(self, user_id):
         User = get_user_model()

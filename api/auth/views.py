@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from api.auth.serializers import LoginSerializer, ReadUserSerializer, CreatUserSerializer
-from api.serializers import CandidateSerializer, VoterSerializer, UserSerializer
+from api.serializers import CandidateSerializer, VoterSerializer, UserSerializer, VoteSerializer, SortedVotesSerializer
 from election.models import Candidate, Vote, Voter
 from drf_yasg import openapi
 
@@ -100,15 +100,64 @@ class UserProfileApiView(GenericAPIView):
         return Response(serializer.data)
 
 
-class CandidateListView(GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+class CandidateListView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        if request.user.role == User.CLIENT:  # Только избиратели могут просматривать кандидатов
-            candidates = Candidate.objects.all()
-            serializer = CandidateSerializer(candidates, many=True)
-            return Response(serializer.data)
-        return Response({"detail": "Доступ разрешен только избирателям."}, status=status.HTTP_403_FORBIDDEN)
+        candidates = Candidate.objects.all()
+        serializer = CandidateSerializer(candidates, many=True)
+        return Response(serializer.data)
+
+
+class SortedVotesView(APIView):
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'voter_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID избирателя"),
+                'votes': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_INTEGER),
+                    description="Массив голосов"
+                )
+            },
+            required=['voter_id', 'votes']
+        ),
+        responses={
+            200: openapi.Response(
+                description="Sorted votes",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_INTEGER),
+                    description="Array of sorted vote counts"
+                )
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'detail': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            )
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        voter_id = request.data.get('voter_id')
+        votes = request.data.get('votes')
+
+        if not voter_id or not votes:
+            return Response(
+                {'detail': 'Both voter_id and votes are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Ваш код для обработки данных
+        sorted_votes = sorted(votes)  # Пример сортировки массива
+
+        return Response(sorted_votes, status=status.HTTP_200_OK)
 
 
 class VoteCreateView(APIView):
