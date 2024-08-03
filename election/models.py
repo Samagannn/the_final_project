@@ -27,11 +27,10 @@ class Candidate(models.Model):
 class Voter(models.Model):
     address = models.CharField(max_length=255)
     has_voted = models.BooleanField(default=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Предполагается связь один к одному
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.user.phone) 
+        return str(self.user.phone)
 
 
 class Vote(models.Model):

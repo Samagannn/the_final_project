@@ -128,7 +128,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -163,8 +162,8 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8000',
-    'https://example.com',
+    'http://localhost:3000',
+    'https://your-frontend-domain.com',
 ]
 
 SWAGGER_SETTINGS = {

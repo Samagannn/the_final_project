@@ -181,5 +181,4 @@ class VoteCreateView(APIView):
         if Vote.objects.filter(voter=voter).exists():
             return Response({"detail": "Вы уже проголосовали."}, status=status.HTTP_400_BAD_REQUEST)
 
-        vote = Vote.objects.create(candidate=candidate, voter=voter)
         return Response({"message": "Голос успешно зарегистрирован"}, status=status.HTTP_201_CREATED)

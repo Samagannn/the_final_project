@@ -56,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class VoterSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  # Включаем только ID пользователя
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Voter
