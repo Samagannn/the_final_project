@@ -3,6 +3,7 @@ from django.contrib.auth.models import BaseUserManager
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
+
     def create_user(self, phone, email, password=None, **extra_fields):
         if not phone:
             raise ValueError('The Phone field must be set')
@@ -24,3 +25,11 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(phone, email, password, **extra_fields)
+
+
+def my_languages(results):
+    lst = []
+    for a, b in results.items():
+        if b >= 60:
+            lst.append(a)
+    return sorted(lst)
