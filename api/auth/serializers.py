@@ -64,7 +64,6 @@ class CreatUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        # Ваши проверки валидности
         if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError({"password_confirmation": "Passwords must match"})
         if not data.get('email'):

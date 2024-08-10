@@ -45,11 +45,9 @@ class RegisterAPIView(APIView):
             token, created = Token.objects.get_or_create(user=user)
             read_serializer = UserSerializer(user, context={'request': request})
             data = {**read_serializer.data, 'token': token.key}
-            if user.role == User.CANDIDATE:
-                return Response({"message": "Пользователь зарегистрирован как кандидат."},
-                                status=status.HTTP_201_CREATED)
-            return Response({"message": "Пользователь зарегистрирован успешно.", **data},
+            return Response({"token": token.key, **data},
                             status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
