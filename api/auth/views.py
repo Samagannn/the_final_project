@@ -47,7 +47,6 @@ class RegisterAPIView(APIView):
             data = {**read_serializer.data, 'token': token.key}
             return Response({"token": token.key, **data},
                             status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
