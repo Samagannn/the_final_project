@@ -43,6 +43,7 @@ class User(AbstractUser):
     )
 
     email = models.EmailField(unique=True)
+    address = models.CharField(max_length=150, blank=True, null=True)
     username = models.CharField(max_length=30, unique=True, blank=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
@@ -53,9 +54,9 @@ class User(AbstractUser):
                                upload_to='avatars/', force_format='WEBP', quality=90, null=True, blank=True)
     employee_id = models.CharField(max_length=30, blank=True, null=True)
     department = models.CharField(max_length=30, blank=True, null=True)
-    bio = models.TextField(blank=True, null=True)  # Добавьте это поле
-    party = models.CharField(max_length=255, blank=True, null=True)  # Добавьте это поле
-    photo = models.ImageField(upload_to='photos/', blank=True, null=True)  # Добавьте это поле
+    bio = models.TextField(blank=True, null=True)
+    party = models.CharField(max_length=255, blank=True, null=True)
+    photo = models.ImageField(upload_to='photos/', blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

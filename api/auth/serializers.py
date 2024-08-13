@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'avatar', 'employee_id',
-                  'department', 'full_name', 'bio', 'party', 'photo']
+                  'department', 'full_name', 'bio', 'party', 'photo', 'address', ]
 
     def get_full_name(self, obj):
         return obj.get_full_name()
@@ -49,8 +49,9 @@ class CandidateSerializer(serializers.ModelSerializer):
 class CreatUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True)
-    party = serializers.CharField(write_only=True, required=False, allow_blank=True)  # Необязательное поле
+    party = serializers.CharField(write_only=True, required=False, allow_blank=True)
     photo = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    address = serializers.CharField(write_only=True, required=False, allow_blank=True)
     bio = serializers.CharField(write_only=True, required=False, allow_blank=True)
     election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
     last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -60,7 +61,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'phone', 'password', 'password_confirmation', 'email', 'role', 'party',
-            'photo', 'bio', 'election', 'last_name', 'first_name'
+            'photo', 'bio', 'election', 'last_name', 'first_name', 'address'
         )
 
     def validate(self, data):
@@ -90,6 +91,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
+            address=validated_data.get('address'),
             email=validated_data['email'],
             role=validated_data['role'],
             last_name=validated_data.get('last_name'),

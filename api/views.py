@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from election.models import Election, Candidate, Vote, Voter
 from . import serializers
 from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
-from .serializers import ElectionSerializer, CandidateSerializer, VoterSerializer, VoterSerializer
+from .serializers import ElectionSerializer, CandidateSerializer, VoteSerializer, VoterSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
@@ -36,7 +36,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
 
 class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all()
-    serializer_class = VoterSerializer
+    serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -50,7 +50,6 @@ class VoterViewSet(viewsets.ModelViewSet):
     serializer_class = VoterSerializer
 
     def create(self, request, *args, **kwargs):
-        # Обработка создания нового Voter
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

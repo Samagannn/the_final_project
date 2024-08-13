@@ -33,7 +33,7 @@ class SortedVotesSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'bio', 'party', 'photo']
+        fields = ['id', 'email', 'address', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'bio', 'party', 'photo']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -51,6 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
             bio=validated_data.get('bio', None),
             party=validated_data.get('party', None),
             photo=validated_data.get('photo', None),
+            address=validated_data.get('address')
         )
         return user
 
