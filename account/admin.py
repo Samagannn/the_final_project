@@ -15,6 +15,9 @@ class UserAdmin(BaseUserAdmin):
         'last_name',
         'role',
         'get_avatar',
+        'bio',
+        'party',
+        'get_photo',
     )
     list_display_links = ('id', 'email',)
     search_fields = ('first_name', 'last_name', 'email', 'phone')
@@ -22,26 +25,10 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'role')
     ordering = ('-date_joined',)
     fieldsets = (
-        (None, {'fields': (
-            'email',
-            'phone',
-            'password',
-        )}),
-        (_('Personal info'), {'fields': (
-            'avatar',
-            'first_name',
-            'last_name',
-        )}),
-        (_('Permissions'), {'fields': (
-            'role',
-            'is_active',
-            'is_staff',
-            'is_superuser',
-        )}),
-        (_('Important dates'), {'fields': (
-            'date_joined',
-            'last_login',
-        )}),
+        (None, {'fields': ('email', 'phone', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'bio', 'party', 'photo')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     readonly_fields = (
         'get_full_name',
@@ -57,6 +44,9 @@ class UserAdmin(BaseUserAdmin):
                 'phone',
                 'password1',
                 'password2',
+                'bio',
+                'party',
+                'photo',
             ),
         }),
     )
@@ -67,8 +57,13 @@ class UserAdmin(BaseUserAdmin):
             return mark_safe(f'<img src="{user.avatar.url}" alt="{user.get_full_name}" width="100px" />')
         return '-'
 
+    @admin.display(description=_('Фотография'))
+    def get_photo(self, user):
+        if user.photo:
+            return mark_safe(f'<img src="{user.photo.url}" alt="{user.get_full_name}" width="100px" />')
+        return '-'
+
     @admin.display(description=_('Полное имя'))
     def get_full_name(self, user):
         return user.get_full_name()
 
-# Register your models here.

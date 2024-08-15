@@ -16,9 +16,9 @@ class Election(models.Model):
 class Candidate(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True)
-    bio = models.TextField(blank=True, null=True)
+    bio = models.TextField()
     party = models.CharField(max_length=255, null=True, blank=True)
-    photo = models.ImageField(upload_to='candidate_photos/', blank=True, null=True)
+    photo = models.ImageField(upload_to='candidate_photos/')
     votes_per_month = models.TextField(blank=True, default='{}')
     last_name = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)

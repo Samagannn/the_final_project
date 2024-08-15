@@ -11,8 +11,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth', 'phone', 'avatar', 'employee_id',
-                  'department', 'full_name', 'bio', 'party', 'photo', 'address', ]
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth',
+            'phone', 'avatar', 'employee_id', 'department', 'full_name',
+            'bio', 'party', 'photo', 'address'
+        ]
 
     def get_full_name(self, obj):
         return obj.get_full_name()
@@ -21,9 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
 
         if instance.role != User.CANDIDATE:
-            representation.pop('photo', None)
+            representation.pop('date_of_birth', None)
+            representation.pop('phone', None)
             representation.pop('bio', None)
             representation.pop('party', None)
+            representation.pop('photo', None)
+            representation.pop('address', None)
 
         return representation
 
@@ -71,12 +77,16 @@ class CreatUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"email": "Email is required"})
 
         role = data.get('role')
-        if role == User.CANDIDATE:
-            # Проверка поля party и bio
+        if role != User.CANDIDATE:
+            data['party'] = ''
+            data['bio'] = ''
+            data['photo'] = ''
+            data['address'] = ''
+        else:
             if not data.get('party'):
-                print("Party field is blank or not provided")
+                raise serializers.ValidationError({"party": "Party is required for candidates."})
             if not data.get('bio'):
-                print("Bio field is blank or not provided")
+                raise serializers.ValidationError({"bio": "Bio is required for candidates."})
 
         return data
 
@@ -91,27 +101,15 @@ class CreatUserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             phone=validated_data['phone'],
             password=validated_data['password'],
-            address=validated_data.get('address'),
             email=validated_data['email'],
             role=validated_data['role'],
             last_name=validated_data.get('last_name'),
             first_name=validated_data.get('first_name'),
+            address=validated_data.get('address'),
+            bio=validated_data.get('bio'),
+            party=validated_data.get('party'),
+            photo=validated_data.get('photo'),
         )
-
-        if user.role == User.CANDIDATE:
-            party = validated_data.get('party')
-            photo = validated_data.get('photo')
-            bio = validated_data.get('bio')
-            election = validated_data.get('election')
-
-            Candidate.objects.create(
-                user=user,
-                party=party,
-                photo=photo,
-                bio=bio,
-                election=election
-            )
-
         return user
 
 
