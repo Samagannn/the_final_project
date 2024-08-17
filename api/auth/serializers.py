@@ -98,17 +98,15 @@ class CreatUserSerializer(serializers.ModelSerializer):
         if User.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
+        optional_fields = ['last_name', 'first_name', 'address', 'bio', 'party', 'photo']
+        user_data = {field: validated_data.get(field) for field in optional_fields}
+
         user = User.objects.create_user(
-            phone=validated_data['phone'],
+            phone=phone,
             password=validated_data['password'],
             email=validated_data['email'],
             role=validated_data['role'],
-            last_name=validated_data.get('last_name'),
-            first_name=validated_data.get('first_name'),
-            address=validated_data.get('address'),
-            bio=validated_data.get('bio'),
-            party=validated_data.get('party'),
-            photo=validated_data.get('photo'),
+            **user_data
         )
         return user
 

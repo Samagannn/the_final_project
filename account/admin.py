@@ -66,4 +66,3 @@ class UserAdmin(BaseUserAdmin):
     @admin.display(description=_('Полное имя'))
     def get_full_name(self, user):
         return user.get_full_name()
-
