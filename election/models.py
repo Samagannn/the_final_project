@@ -28,7 +28,7 @@ class Voter(models.Model):
     address = models.CharField(max_length=255)
     has_voted = models.BooleanField(default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
-
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
         return str(self.user.phone)
 

@@ -58,9 +58,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class VoterSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Voter
-        fields = ['id', 'user', 'address']
+        fields = ['id', 'user', 'address', 'election']
 
     def validate(self, data):
         user = data.get('user')
