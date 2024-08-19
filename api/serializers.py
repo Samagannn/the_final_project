@@ -60,13 +60,12 @@ class UserSerializer(serializers.ModelSerializer):
 class VoterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Voter
-        fields = ['id', 'user', 'election']
+        fields = ['id', 'user', 'address']
 
     def validate(self, data):
         user = data.get('user')
-        election = data.get('election')
 
-        if Voter.objects.filter(user=user, election=election).exists():
+        if Voter.objects.filter(user=user).exists():
             raise serializers.ValidationError(
                 {"user": "Этот пользователь уже зарегистрирован как избиратель для этих выборов."})
 
