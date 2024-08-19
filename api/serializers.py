@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'phone', 'bio', 'party', 'photo',
-                  'address']
+                  ]
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -52,16 +52,14 @@ class UserSerializer(serializers.ModelSerializer):
             bio=validated_data['bio'],
             party=validated_data['party'],
             photo=validated_data['photo'],
-            address=validated_data.get('address')
         )
         return user
 
 
 class VoterSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Voter
-        fields = ['id', 'user', 'address', 'election']
+        fields = ['id', 'user', 'election']
 
     def validate(self, data):
         user = data.get('user')

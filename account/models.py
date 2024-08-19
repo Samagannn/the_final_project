@@ -43,7 +43,6 @@ class User(AbstractUser):
     )
 
     email = models.EmailField(unique=True)
-    address = models.CharField(max_length=150, blank=True)
     username = models.CharField(max_length=30, unique=True, blank=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
