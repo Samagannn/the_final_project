@@ -57,7 +57,7 @@ class CreatUserSerializer(serializers.ModelSerializer):
     password_confirmation = serializers.CharField(write_only=True)
     party = serializers.CharField(write_only=True, required=False, allow_blank=True)
     photo = serializers.ImageField(write_only=True, required=False, allow_null=True)
-    address = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    address = serializers.CharField(write_only=True, required=True, allow_blank=False)
     bio = serializers.CharField(write_only=True, required=False, allow_blank=True)
     election = serializers.PrimaryKeyRelatedField(queryset=Election.objects.all(), required=False, allow_null=True)
     last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -98,15 +98,18 @@ class CreatUserSerializer(serializers.ModelSerializer):
         if User.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({"phone": "A user with this phone number already exists."})
 
-        optional_fields = ['last_name', 'first_name', 'address', 'bio', 'party', 'photo']
-        user_data = {field: validated_data.get(field) for field in optional_fields}
+        # optional_fields = ['last_name', 'first_name', 'address', 'bio', 'party', 'photo']
+        # user_data = {field: validated_data.get(field) for field in optional_fields}
 
         user = User.objects.create_user(
             phone=phone,
             password=validated_data['password'],
             email=validated_data['email'],
             role=validated_data['role'],
-            **user_data
+            address=validated_data['address'],
+            bio=validated_data['bio'],
+            party=validated_data['party'],
+            photo=validated_data['photo'],
         )
         return user
 
