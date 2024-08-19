@@ -106,6 +106,9 @@ class CreatUserSerializer(serializers.ModelSerializer):
             bio=validated_data['bio'],
             party=validated_data['party'],
             photo=validated_data['photo'],
+            last_name=validated_data['last_name'],
+            first_name=validated_data['first_name']
+
         )
         return user
 
