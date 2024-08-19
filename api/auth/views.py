@@ -28,7 +28,6 @@ class RegisterAPIView(APIView):
                 'password': openapi.Schema(type=openapi.TYPE_STRING),
                 'password_confirmation': openapi.Schema(type=openapi.TYPE_STRING),
                 'email': openapi.Schema(type=openapi.TYPE_STRING),
-                'address': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY),
                 'first_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'last_name': openapi.Schema(type=openapi.TYPE_STRING),
                 'role': openapi.Schema(type=openapi.TYPE_STRING, enum=[User.CLIENT, User.CANDIDATE, User.ADMIN]),

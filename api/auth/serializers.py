@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'first_name', 'last_name', 'role', 'date_of_birth',
             'phone', 'avatar', 'employee_id', 'department', 'full_name',
-            'bio', 'party', 'photo', 'address'
+            'bio', 'party', 'photo'
         ]
 
     def get_full_name(self, obj):
@@ -29,7 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
             representation.pop('bio', None)
             representation.pop('party', None)
             representation.pop('photo', None)
-            representation.pop('address', None)
 
         return representation
 
