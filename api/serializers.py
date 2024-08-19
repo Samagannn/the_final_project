@@ -58,8 +58,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class VoterSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
     class Meta:
         model = Voter
-        fields = ['id', 'address', 'has_voted', 'user']
+        fields = ['id', 'user', 'election']
+
+    def validate(self, data):
+        user = data.get('user')
+        election = data.get('election')
+
+        if Voter.objects.filter(user=user, election=election).exists():
+            raise serializers.ValidationError(
+                {"user": "Этот пользователь уже зарегистрирован как избиратель для этих выборов."})
+
+        return data

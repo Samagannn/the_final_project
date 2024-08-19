@@ -136,7 +136,7 @@ class ReadUserSerializer(serializers.ModelSerializer):
 
         if new_password:
             validate_password(new_password)
-
+        
         return data
 
     def update(self, instance, validated_data):
