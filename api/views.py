@@ -1,6 +1,9 @@
+from datetime import timezone
+
 from httpie import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.utils import json
 from rest_framework.viewsets import ModelViewSet
 from election.models import Election, Candidate, Vote, Voter
 from . import serializers
@@ -11,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import status
+from rest_framework import serializers
 
 
 class ElectionViewSet(viewsets.ModelViewSet):
@@ -41,8 +45,15 @@ class VoteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        # Проверяем, зарегистрирован ли пользователь как избиратель
+        if not hasattr(self.request.user, 'voter'):
+            raise serializers.ValidationError("Вы не зарегистрированы как избиратель.")
+
+        # Проверяем, голосовал ли уже пользователь
         if Vote.objects.filter(voter=self.request.user.voter).exists():
             raise serializers.ValidationError("Вы уже проголосовали.")
+
+        # Сохраняем голос
         serializer.save(voter=self.request.user.voter)
 
 

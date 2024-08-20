@@ -16,8 +16,8 @@ class CandidateSerializer(serializers.ModelSerializer):
 
 
 class VoteSerializer(serializers.ModelSerializer):
-    candidate = CandidateSerializer()  # To include candidate details
-    voter = serializers.PrimaryKeyRelatedField(queryset=Voter.objects.all())  # Only include voter ID
+    candidate = CandidateSerializer()
+    voter = serializers.PrimaryKeyRelatedField(queryset=Voter.objects.all())
 
     class Meta:
         model = Vote
