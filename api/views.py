@@ -16,7 +16,6 @@ from rest_framework import filters
 from rest_framework import status
 from rest_framework import serializers
 
-
 class ElectionViewSet(viewsets.ModelViewSet):
     queryset = Election.objects.all()
     serializer_class = ElectionSerializer
@@ -43,6 +42,7 @@ class VoteViewSet(viewsets.ModelViewSet):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated]
+
 
     def perform_create(self, serializer):
         # Проверяем, зарегистрирован ли пользователь как избиратель

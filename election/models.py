@@ -34,22 +34,29 @@ class Voter(models.Model):
 
 
 class Vote(models.Model):
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
-    voter = models.ForeignKey(Voter, on_delete=models.CASCADE)
+    candidate = models.ForeignKey('Candidate', on_delete=models.CASCADE)
+    voter = models.ForeignKey('Voter', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        # Сохраняем голос
         super().save(*args, **kwargs)
-        month = self.timestamp.strftime('%Y-%m')
-        candidate = self.candidate
 
+        # Обновляем поле votes_per_month у кандидата
+        candidate = self.candidate
+        month = self.timestamp.strftime('%Y-%m')
+
+        # Получаем текущие данные из votes_per_month
         if candidate.votes_per_month:
             votes_per_month = json.loads(candidate.votes_per_month)
         else:
             votes_per_month = {}
 
+        # Обновляем количество голосов
         votes_per_month[month] = votes_per_month.get(month, 0) + 1
+
+        # Сохраняем обновленное значение
         candidate.votes_per_month = json.dumps(votes_per_month)
-        candidate.save()
+        candidate.save(update_fields=['votes_per_month'])
 
 # Create your models here.
